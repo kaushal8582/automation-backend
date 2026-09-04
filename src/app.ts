@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { env } from './config/env.js';
+import { isAllowedFrontendOrigin } from './config/env.js';
 import { API_PREFIX } from './constants/index.js';
 import apiRoutes from './routes/index.js';
 import { requestIdMiddleware } from './middlewares/request-id.js';
@@ -15,7 +15,18 @@ export function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin(origin, callback) {
+        // Non-browser clients (curl, health checks) send no Origin
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        if (isAllowedFrontendOrigin(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      },
       credentials: true,
     }),
   );

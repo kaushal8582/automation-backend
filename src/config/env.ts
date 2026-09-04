@@ -9,13 +9,35 @@ const emptyToUndefined = (value: unknown) => {
   return value;
 };
 
+function parseFrontendOrigins(raw: string): string[] {
+  const origins = raw
+    .split(',')
+    .map((part) => part.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+
+  const unique: string[] = [];
+  for (const origin of origins) {
+    try {
+      // Validate each entry is a full URL origin
+      const url = new URL(origin);
+      const normalized = url.origin;
+      if (!unique.includes(normalized)) unique.push(normalized);
+    } catch {
+      // ignore invalid — validated below
+    }
+  }
+  return unique;
+}
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     PORT: z.coerce.number().int().positive().default(5001),
     MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
     REDIS_URL: z.string().min(1, 'REDIS_URL is required'),
-    FRONTEND_URL: z.string().url(),
+    // Comma-separated allowed. First = primary (OAuth redirects).
+    // Example: http://localhost:3000,https://app.mastplayer.in
+    FRONTEND_URL: z.string().min(1, 'FRONTEND_URL is required'),
     BACKEND_URL: z.string().url(),
     JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
     JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
@@ -55,6 +77,16 @@ const envSchema = z
     PUBLISH_WORKER_CONCURRENCY: z.coerce.number().int().positive().default(5),
   })
   .superRefine((data, ctx) => {
+    const origins = parseFrontendOrigins(data.FRONTEND_URL);
+    if (origins.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['FRONTEND_URL'],
+        message:
+          'FRONTEND_URL must be one or more comma-separated absolute URLs (e.g. http://localhost:3000,https://app.example.com)',
+      });
+    }
+
     const bucket = data.R2_BUCKET ?? data.R2_BUCKET_NAME;
     if (!bucket) {
       ctx.addIssue({
@@ -80,9 +112,13 @@ const envSchema = z
     const endpoint =
       data.R2_ENDPOINT ?? `https://${data.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
     const publicBaseUrl = data.R2_PUBLIC_URL ?? data.R2_PUBLIC_BASE_URL;
+    const frontendUrls = parseFrontendOrigins(data.FRONTEND_URL);
+    const frontendUrl = frontendUrls[0]!;
 
     return {
       ...data,
+      FRONTEND_URL: frontendUrl,
+      FRONTEND_URLS: frontendUrls,
       R2_BUCKET: bucket,
       R2_ENDPOINT: endpoint,
       R2_PUBLIC_URL: publicBaseUrl,
@@ -104,3 +140,10 @@ function loadEnv(): Env {
 }
 
 export const env = loadEnv();
+
+/** True if request Origin is an allowed frontend. */
+export function isAllowedFrontendOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+  const normalized = origin.replace(/\/$/, '');
+  return env.FRONTEND_URLS.includes(normalized);
+}
