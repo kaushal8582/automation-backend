@@ -29,6 +29,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
     FACEBOOK_APP_SECRET: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
     FACEBOOK_REDIRECT_URI: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
+    FACEBOOK_CONFIG_ID: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
     FACEBOOK_OAUTH_SCOPES: z.ZodDefault<z.ZodString>;
     META_GRAPH_API_VERSION: z.ZodDefault<z.ZodString>;
     IG_MEDIA_POLL_INTERVAL_MS: z.ZodDefault<z.ZodNumber>;
@@ -69,6 +70,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID?: string | undefined;
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
+    FACEBOOK_CONFIG_ID?: string | undefined;
 }, {
     MONGODB_URI: string;
     REDIS_URL: string;
@@ -99,6 +101,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID?: unknown;
     FACEBOOK_APP_SECRET?: unknown;
     FACEBOOK_REDIRECT_URI?: unknown;
+    FACEBOOK_CONFIG_ID?: unknown;
     FACEBOOK_OAUTH_SCOPES?: string | undefined;
     META_GRAPH_API_VERSION?: string | undefined;
     IG_MEDIA_POLL_INTERVAL_MS?: number | undefined;
@@ -139,6 +142,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID?: string | undefined;
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
+    FACEBOOK_CONFIG_ID?: string | undefined;
 }, {
     MONGODB_URI: string;
     REDIS_URL: string;
@@ -169,6 +173,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID?: unknown;
     FACEBOOK_APP_SECRET?: unknown;
     FACEBOOK_REDIRECT_URI?: unknown;
+    FACEBOOK_CONFIG_ID?: unknown;
     FACEBOOK_OAUTH_SCOPES?: string | undefined;
     META_GRAPH_API_VERSION?: string | undefined;
     IG_MEDIA_POLL_INTERVAL_MS?: number | undefined;
@@ -210,6 +215,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID?: string | undefined;
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
+    FACEBOOK_CONFIG_ID?: string | undefined;
 }, {
     MONGODB_URI: string;
     REDIS_URL: string;
@@ -240,6 +246,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_ID?: unknown;
     FACEBOOK_APP_SECRET?: unknown;
     FACEBOOK_REDIRECT_URI?: unknown;
+    FACEBOOK_CONFIG_ID?: unknown;
     FACEBOOK_OAUTH_SCOPES?: string | undefined;
     META_GRAPH_API_VERSION?: string | undefined;
     IG_MEDIA_POLL_INTERVAL_MS?: number | undefined;
@@ -283,6 +290,7 @@ export declare const env: {
     FACEBOOK_APP_ID?: string | undefined;
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
+    FACEBOOK_CONFIG_ID?: string | undefined;
 };
 /** True if request Origin is an allowed frontend. */
 export declare function isAllowedFrontendOrigin(origin: string | undefined): boolean;

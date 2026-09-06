@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
 import { env } from '../config/env.js';
-import { getFacebookAppCredentials, getFacebookOAuthRedirectUri, getFacebookOAuthScopes, } from '../config/facebook-oauth.js';
+import { getFacebookAppCredentials, getFacebookConfigId, getFacebookOAuthRedirectUri, getFacebookOAuthScopes, } from '../config/facebook-oauth.js';
 import { AppError } from '../middlewares/error-handler.js';
 import { SocialAccount } from '../models/social-account.model.js';
 import { createFacebookGraphClient } from '../providers/meta/meta-client.js';
@@ -32,15 +32,22 @@ function toPublicAccount(account) {
 export async function buildFacebookConnectUrl(userId) {
     const { appId } = getFacebookAppCredentials();
     const redirectUri = getFacebookOAuthRedirectUri();
-    const scopes = getFacebookOAuthScopes();
+    const configId = getFacebookConfigId();
     const state = await createFacebookOAuthState({ userId });
     const params = new URLSearchParams({
         client_id: appId,
         redirect_uri: redirectUri,
         response_type: 'code',
-        scope: scopes.join(','),
         state,
     });
+    // Facebook Login for Business: permissions come from config_id (scope= causes "Invalid Scopes")
+    if (configId) {
+        params.set('config_id', configId);
+        params.set('override_default_response_type', 'true');
+    }
+    else {
+        params.set('scope', getFacebookOAuthScopes().join(','));
+    }
     const authorizationUrl = `https://www.facebook.com/dialog/oauth?${params.toString()}`;
     return { authorizationUrl, redirectUri, state };
 }

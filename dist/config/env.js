@@ -67,6 +67,8 @@ const envSchema = z
     FACEBOOK_APP_ID: z.preprocess(emptyToUndefined, z.string().optional()),
     FACEBOOK_APP_SECRET: z.preprocess(emptyToUndefined, z.string().optional()),
     FACEBOOK_REDIRECT_URI: z.preprocess(emptyToUndefined, z.string().url().optional()),
+    // Required for Facebook Login for Business (replaces scope= in OAuth URL)
+    FACEBOOK_CONFIG_ID: z.preprocess(emptyToUndefined, z.string().optional()),
     FACEBOOK_OAUTH_SCOPES: z
         .string()
         .default('pages_manage_posts,pages_read_engagement,pages_show_list'),
