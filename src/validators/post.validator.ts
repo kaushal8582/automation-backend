@@ -1,13 +1,33 @@
 import { z } from 'zod';
 import { POST_STATUSES } from '../types/domain.js';
 
+const publishOptionsSchema = z
+  .object({
+    shareToFeed: z.boolean().optional(),
+    hideLikeCount: z.boolean().optional(),
+  })
+  .optional();
+
 export const createPostSchema = z.object({
   mediaId: z.string().min(1),
   socialAccountIds: z.array(z.string().min(1)).min(1).max(20),
   caption: z.string().max(2200).optional(),
   instagramCaption: z.string().max(2200).optional(),
+  thumbnailMediaId: z.string().min(1).optional(),
   scheduledAt: z.string().datetime().optional(),
   timezone: z.string().min(1).max(64).optional(),
+  options: publishOptionsSchema,
+});
+
+export const createPostsBatchSchema = z.object({
+  mediaIds: z.array(z.string().min(1)).min(1).max(20),
+  socialAccountIds: z.array(z.string().min(1)).min(1).max(20),
+  caption: z.string().max(2200).optional(),
+  instagramCaption: z.string().max(2200).optional(),
+  thumbnailMediaId: z.string().min(1).optional(),
+  scheduledAt: z.string().datetime().optional(),
+  timezone: z.string().min(1).max(64).optional(),
+  options: publishOptionsSchema,
 });
 
 export const listPostsQuerySchema = z
@@ -40,5 +60,6 @@ export const retryPostSchema = z.object({
 });
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
+export type CreatePostsBatchInput = z.infer<typeof createPostsBatchSchema>;
 export type ListPostsQuery = z.infer<typeof listPostsQuerySchema>;
 export type RetryPostInput = z.infer<typeof retryPostSchema>;

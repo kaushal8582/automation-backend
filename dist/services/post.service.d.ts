@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { type IPostDocument } from '../models/post.model.js';
 import { type IPostDestinationDocument } from '../models/post-destination.model.js';
-import type { CreatePostInput } from '../validators/post.validator.js';
+import type { CreatePostInput, CreatePostsBatchInput } from '../validators/post.validator.js';
 import type { DestinationStatus } from '../types/domain.js';
 export type PublicPostDestination = {
     id: string;
@@ -24,6 +24,7 @@ export type PublicPostDestination = {
 export type PublicPost = {
     id: string;
     mediaId: string;
+    thumbnailMediaId?: string;
     caption: string;
     instagramCaption?: string;
     facebookCaption?: string;
@@ -34,6 +35,10 @@ export type PublicPost = {
     totalDestinations: number;
     successfulDestinations: number;
     failedDestinations: number;
+    publishOptions?: {
+        shareToFeed?: boolean;
+        hideLikeCount?: boolean;
+    };
     createdAt: Date;
     updatedAt: Date;
 };
@@ -43,6 +48,12 @@ export declare function syncPostFromDestinations(postId: Types.ObjectId): Promis
 export declare function createPost(userId: string, input: CreatePostInput): Promise<{
     post: PublicPost;
     destinations: PublicPostDestination[];
+    usedTemporaryUrl: boolean;
+}>;
+export declare function createPostsBatch(userId: string, input: CreatePostsBatchInput): Promise<{
+    posts: PublicPost[];
+    total: number;
+    queuedDestinations: number;
     usedTemporaryUrl: boolean;
 }>;
 export declare function listPosts(userId: string, options?: {

@@ -3,6 +3,9 @@ export type CreateMediaContainerInput = {
   accessToken: string;
   videoUrl: string;
   caption?: string;
+  coverUrl?: string;
+  shareToFeed?: boolean;
+  hideLikeCount?: boolean;
 };
 
 export type CreateMediaContainerResult = {

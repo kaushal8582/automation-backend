@@ -55,7 +55,25 @@ export async function publishDestinationJob(job) {
     if (!videoUrl.startsWith('http')) {
         throw new AppError('Video public URL is unavailable. Set R2_PUBLIC_URL.', 400, 'MEDIA_PUBLIC_URL_REQUIRED');
     }
+    let coverUrl;
+    if (post.thumbnailMediaId) {
+        const thumb = await MediaAsset.findById(post.thumbnailMediaId);
+        if (thumb?.status === 'ready') {
+            try {
+                const url = await resolveAccessibleMediaUrl(thumb.r2Key, thumb.publicUrl);
+                if (url.startsWith('http'))
+                    coverUrl = url;
+            }
+            catch (error) {
+                logger.warn('Thumbnail URL resolve failed; continuing without cover', {
+                    postId: post.id,
+                    error: error instanceof Error ? error.message : String(error),
+                });
+            }
+        }
+    }
     const effectiveCaption = post.instagramCaption ?? post.caption ?? '';
+    const publishOptions = post.publishOptions ?? {};
     destination.status = 'publishing';
     destination.attempts = (destination.attempts ?? 0) + 1;
     await destination.save();
@@ -73,6 +91,9 @@ export async function publishDestinationJob(job) {
             accessToken,
             videoUrl,
             caption: effectiveCaption,
+            coverUrl,
+            shareToFeed: publishOptions.shareToFeed,
+            hideLikeCount: publishOptions.hideLikeCount,
         });
     }
     else if (destination.platform === 'facebook') {
@@ -82,6 +103,7 @@ export async function publishDestinationJob(job) {
             accessToken,
             videoUrl,
             caption: effectiveCaption,
+            coverUrl,
         });
     }
     else {

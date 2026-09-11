@@ -3,6 +3,7 @@ import { type PostStatus, type PublishMode } from '../types/domain.js';
 export interface IPost {
     userId: Types.ObjectId;
     mediaId: Types.ObjectId;
+    thumbnailMediaId?: Types.ObjectId;
     caption: string;
     instagramCaption?: string;
     facebookCaption?: string;
@@ -13,6 +14,10 @@ export interface IPost {
     totalDestinations: number;
     successfulDestinations: number;
     failedDestinations: number;
+    publishOptions?: {
+        shareToFeed?: boolean;
+        hideLikeCount?: boolean;
+    };
     createdAt: Date;
     updatedAt: Date;
 }

@@ -2,12 +2,18 @@ import type { Request, Response, NextFunction } from 'express';
 import {
   cancelPost,
   createPost,
+  createPostsBatch,
   getPostById,
   listPosts,
   retryPost,
 } from '../services/post.service.js';
 import { getPostMetrics, syncPostMetrics } from '../services/metrics.service.js';
-import type { CreatePostInput, ListPostsQuery, RetryPostInput } from '../validators/post.validator.js';
+import type {
+  CreatePostInput,
+  CreatePostsBatchInput,
+  ListPostsQuery,
+  RetryPostInput,
+} from '../validators/post.validator.js';
 
 export async function createPostHandler(
   req: Request,
@@ -16,6 +22,19 @@ export async function createPostHandler(
 ): Promise<void> {
   try {
     const result = await createPost(req.user!.id, req.body as CreatePostInput);
+    res.status(202).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createPostsBatchHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const result = await createPostsBatch(req.user!.id, req.body as CreatePostsBatchInput);
     res.status(202).json({ success: true, data: result });
   } catch (error) {
     next(error);

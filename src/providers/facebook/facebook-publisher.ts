@@ -78,6 +78,7 @@ export class FacebookPublisher implements SocialPublisher {
             description: input.caption ?? '',
             published: true,
             access_token: input.accessToken,
+            ...(input.coverUrl ? { thumb: input.coverUrl } : {}),
           },
         },
       );

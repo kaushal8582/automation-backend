@@ -54,17 +54,23 @@ export class InstagramPublisher implements SocialPublisher {
         apiVersion: env.META_GRAPH_API_VERSION,
       });
 
+      const params: Record<string, string | boolean> = {
+        media_type: 'REELS',
+        video_url: input.videoUrl,
+        caption: input.caption ?? '',
+        access_token: input.accessToken,
+      };
+      if (input.coverUrl) params.cover_url = input.coverUrl;
+      if (input.shareToFeed === true) params.share_to_feed = true;
+      if (input.hideLikeCount === true) {
+        // Best-effort; ignored by Meta if unsupported for this app/token
+        params.like_and_view_counts_disabled = true;
+      }
+
       const { data } = await this.client.post<{ id: string }>(
         `/${input.platformAccountId}/media`,
         null,
-        {
-          params: {
-            media_type: 'REELS',
-            video_url: input.videoUrl,
-            caption: input.caption ?? '',
-            access_token: input.accessToken,
-          },
-        },
+        { params },
       );
 
       if (!data?.id) {

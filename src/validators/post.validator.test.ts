@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createPostSchema, listPostsQuerySchema, retryPostSchema } from '../validators/post.validator.js';
+import {
+  createPostSchema,
+  createPostsBatchSchema,
+  listPostsQuerySchema,
+  retryPostSchema,
+} from '../validators/post.validator.js';
 
 describe('createPostSchema', () => {
   it('accepts mediaId + socialAccountIds array', () => {
@@ -46,6 +51,44 @@ describe('createPostSchema', () => {
       mediaId: 'abc',
       socialAccountIds: ['def'],
       scheduledAt: 'not-a-date',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts thumbnail and options', () => {
+    const parsed = createPostSchema.parse({
+      mediaId: 'abc',
+      socialAccountIds: ['def'],
+      thumbnailMediaId: 'thumb1',
+      options: { shareToFeed: true, hideLikeCount: true },
+    });
+    expect(parsed.thumbnailMediaId).toBe('thumb1');
+    expect(parsed.options?.shareToFeed).toBe(true);
+  });
+});
+
+describe('createPostsBatchSchema', () => {
+  it('accepts mediaIds batch', () => {
+    const parsed = createPostsBatchSchema.parse({
+      mediaIds: ['a', 'b'],
+      socialAccountIds: ['acc1'],
+      caption: 'batch',
+    });
+    expect(parsed.mediaIds).toHaveLength(2);
+  });
+
+  it('rejects more than 20 mediaIds', () => {
+    const result = createPostsBatchSchema.safeParse({
+      mediaIds: Array.from({ length: 21 }, (_, i) => `m${i}`),
+      socialAccountIds: ['acc1'],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty mediaIds', () => {
+    const result = createPostsBatchSchema.safeParse({
+      mediaIds: [],
+      socialAccountIds: ['acc1'],
     });
     expect(result.success).toBe(false);
   });

@@ -1,8 +1,17 @@
-import { cancelPost, createPost, getPostById, listPosts, retryPost, } from '../services/post.service.js';
+import { cancelPost, createPost, createPostsBatch, getPostById, listPosts, retryPost, } from '../services/post.service.js';
 import { getPostMetrics, syncPostMetrics } from '../services/metrics.service.js';
 export async function createPostHandler(req, res, next) {
     try {
         const result = await createPost(req.user.id, req.body);
+        res.status(202).json({ success: true, data: result });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+export async function createPostsBatchHandler(req, res, next) {
+    try {
+        const result = await createPostsBatch(req.user.id, req.body);
         res.status(202).json({ success: true, data: result });
     }
     catch (error) {

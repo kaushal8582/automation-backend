@@ -33,6 +33,7 @@ export function toPublicPost(post) {
     return {
         id: post._id.toString(),
         mediaId: post.mediaId.toString(),
+        thumbnailMediaId: post.thumbnailMediaId?.toString(),
         caption: post.caption,
         instagramCaption: post.instagramCaption,
         facebookCaption: post.facebookCaption,
@@ -43,6 +44,7 @@ export function toPublicPost(post) {
         totalDestinations: post.totalDestinations,
         successfulDestinations: post.successfulDestinations,
         failedDestinations: post.failedDestinations,
+        publishOptions: post.publishOptions,
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
     };
@@ -82,6 +84,22 @@ export async function createPost(userId, input) {
     const media = await MediaAsset.findOne({ _id: input.mediaId, userId, type: 'video' });
     if (!media || media.status !== 'ready') {
         throw new AppError('Ready video media not found', 404, 'MEDIA_NOT_FOUND');
+    }
+    let thumbnailMediaId;
+    if (input.thumbnailMediaId) {
+        if (!Types.ObjectId.isValid(input.thumbnailMediaId)) {
+            throw new AppError('Invalid thumbnail media id', 400, 'INVALID_THUMBNAIL_MEDIA_ID');
+        }
+        const thumb = await MediaAsset.findOne({
+            _id: input.thumbnailMediaId,
+            userId,
+            type: { $in: ['image', 'thumbnail'] },
+            status: 'ready',
+        });
+        if (!thumb) {
+            throw new AppError('Ready thumbnail image not found', 404, 'THUMBNAIL_NOT_FOUND');
+        }
+        thumbnailMediaId = thumb._id;
     }
     // Validate all requested accounts (instagram + facebook)
     const accounts = await SocialAccount.find({
@@ -125,6 +143,7 @@ export async function createPost(userId, input) {
     const post = await Post.create({
         userId,
         mediaId: media._id,
+        thumbnailMediaId,
         caption: input.caption ?? '',
         instagramCaption: input.instagramCaption,
         publishMode,
@@ -134,6 +153,7 @@ export async function createPost(userId, input) {
         totalDestinations: uniqueAccountIds.length,
         successfulDestinations: 0,
         failedDestinations: 0,
+        publishOptions: input.options,
     });
     // Create one PostDestination per account
     const destinations = await PostDestination.insertMany(accounts.map((account) => ({
@@ -155,6 +175,64 @@ export async function createPost(userId, input) {
         post: toPublicPost(post),
         destinations: destinations.map(toPublicDestination),
         usedTemporaryUrl,
+    };
+}
+export async function createPostsBatch(userId, input) {
+    const uniqueMediaIds = [...new Set(input.mediaIds)];
+    if (uniqueMediaIds.length === 0) {
+        throw new AppError('At least one media id is required', 400, 'VALIDATION_ERROR');
+    }
+    if (uniqueMediaIds.length > 20) {
+        throw new AppError('Maximum 20 videos per batch', 400, 'BATCH_TOO_LARGE');
+    }
+    for (const id of uniqueMediaIds) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new AppError(`Invalid media id: ${id}`, 400, 'INVALID_MEDIA_ID');
+        }
+    }
+    // Validate all videos exist + ready before creating any posts
+    const videos = await MediaAsset.find({
+        _id: { $in: uniqueMediaIds },
+        userId,
+        type: 'video',
+        status: 'ready',
+    });
+    if (videos.length !== uniqueMediaIds.length) {
+        throw new AppError('One or more ready videos were not found', 404, 'MEDIA_NOT_FOUND');
+    }
+    if (input.thumbnailMediaId) {
+        if (!Types.ObjectId.isValid(input.thumbnailMediaId)) {
+            throw new AppError('Invalid thumbnail media id', 400, 'INVALID_THUMBNAIL_MEDIA_ID');
+        }
+        const thumb = await MediaAsset.findOne({
+            _id: input.thumbnailMediaId,
+            userId,
+            type: { $in: ['image', 'thumbnail'] },
+            status: 'ready',
+        });
+        if (!thumb) {
+            throw new AppError('Ready thumbnail image not found', 404, 'THUMBNAIL_NOT_FOUND');
+        }
+    }
+    const results = [];
+    for (const mediaId of uniqueMediaIds) {
+        const created = await createPost(userId, {
+            mediaId,
+            socialAccountIds: input.socialAccountIds,
+            caption: input.caption,
+            instagramCaption: input.instagramCaption,
+            thumbnailMediaId: input.thumbnailMediaId,
+            scheduledAt: input.scheduledAt,
+            timezone: input.timezone,
+            options: input.options,
+        });
+        results.push(created);
+    }
+    return {
+        posts: results.map((r) => r.post),
+        total: results.length,
+        queuedDestinations: results.reduce((sum, r) => sum + r.destinations.length, 0),
+        usedTemporaryUrl: results.some((r) => r.usedTemporaryUrl),
     };
 }
 export async function listPosts(userId, options = {}) {

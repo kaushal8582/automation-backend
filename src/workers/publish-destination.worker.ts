@@ -75,7 +75,24 @@ export async function publishDestinationJob(
     );
   }
 
+  let coverUrl: string | undefined;
+  if (post.thumbnailMediaId) {
+    const thumb = await MediaAsset.findById(post.thumbnailMediaId);
+    if (thumb?.status === 'ready') {
+      try {
+        const url = await resolveAccessibleMediaUrl(thumb.r2Key, thumb.publicUrl);
+        if (url.startsWith('http')) coverUrl = url;
+      } catch (error) {
+        logger.warn('Thumbnail URL resolve failed; continuing without cover', {
+          postId: post.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }
+
   const effectiveCaption = post.instagramCaption ?? post.caption ?? '';
+  const publishOptions = post.publishOptions ?? {};
 
   destination.status = 'publishing';
   destination.attempts = (destination.attempts ?? 0) + 1;
@@ -98,6 +115,9 @@ export async function publishDestinationJob(
       accessToken,
       videoUrl,
       caption: effectiveCaption,
+      coverUrl,
+      shareToFeed: publishOptions.shareToFeed,
+      hideLikeCount: publishOptions.hideLikeCount,
     });
   } else if (destination.platform === 'facebook') {
     const publisher = new FacebookPublisher();
@@ -106,6 +126,7 @@ export async function publishDestinationJob(
       accessToken,
       videoUrl,
       caption: effectiveCaption,
+      coverUrl,
     });
   } else {
     throw new AppError(

@@ -47,6 +47,7 @@ export class FacebookPublisher {
                     description: input.caption ?? '',
                     published: true,
                     access_token: input.accessToken,
+                    ...(input.coverUrl ? { thumb: input.coverUrl } : {}),
                 },
             });
             if (!data?.id) {

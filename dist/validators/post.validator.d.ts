@@ -4,20 +4,84 @@ export declare const createPostSchema: z.ZodObject<{
     socialAccountIds: z.ZodArray<z.ZodString, "many">;
     caption: z.ZodOptional<z.ZodString>;
     instagramCaption: z.ZodOptional<z.ZodString>;
+    thumbnailMediaId: z.ZodOptional<z.ZodString>;
     scheduledAt: z.ZodOptional<z.ZodString>;
     timezone: z.ZodOptional<z.ZodString>;
+    options: z.ZodOptional<z.ZodObject<{
+        shareToFeed: z.ZodOptional<z.ZodBoolean>;
+        hideLikeCount: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    }, {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    }>>;
 }, "strip", z.ZodTypeAny, {
     mediaId: string;
     socialAccountIds: string[];
+    options?: {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    } | undefined;
     timezone?: string | undefined;
     caption?: string | undefined;
+    thumbnailMediaId?: string | undefined;
     instagramCaption?: string | undefined;
     scheduledAt?: string | undefined;
 }, {
     mediaId: string;
     socialAccountIds: string[];
+    options?: {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    } | undefined;
     timezone?: string | undefined;
     caption?: string | undefined;
+    thumbnailMediaId?: string | undefined;
+    instagramCaption?: string | undefined;
+    scheduledAt?: string | undefined;
+}>;
+export declare const createPostsBatchSchema: z.ZodObject<{
+    mediaIds: z.ZodArray<z.ZodString, "many">;
+    socialAccountIds: z.ZodArray<z.ZodString, "many">;
+    caption: z.ZodOptional<z.ZodString>;
+    instagramCaption: z.ZodOptional<z.ZodString>;
+    thumbnailMediaId: z.ZodOptional<z.ZodString>;
+    scheduledAt: z.ZodOptional<z.ZodString>;
+    timezone: z.ZodOptional<z.ZodString>;
+    options: z.ZodOptional<z.ZodObject<{
+        shareToFeed: z.ZodOptional<z.ZodBoolean>;
+        hideLikeCount: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    }, {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    socialAccountIds: string[];
+    mediaIds: string[];
+    options?: {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    } | undefined;
+    timezone?: string | undefined;
+    caption?: string | undefined;
+    thumbnailMediaId?: string | undefined;
+    instagramCaption?: string | undefined;
+    scheduledAt?: string | undefined;
+}, {
+    socialAccountIds: string[];
+    mediaIds: string[];
+    options?: {
+        shareToFeed?: boolean | undefined;
+        hideLikeCount?: boolean | undefined;
+    } | undefined;
+    timezone?: string | undefined;
+    caption?: string | undefined;
+    thumbnailMediaId?: string | undefined;
     instagramCaption?: string | undefined;
     scheduledAt?: string | undefined;
 }>;
@@ -60,6 +124,7 @@ export declare const retryPostSchema: z.ZodObject<{
     destinationIds?: string[] | undefined;
 }>;
 export type CreatePostInput = z.infer<typeof createPostSchema>;
+export type CreatePostsBatchInput = z.infer<typeof createPostsBatchSchema>;
 export type ListPostsQuery = z.infer<typeof listPostsQuerySchema>;
 export type RetryPostInput = z.infer<typeof retryPostSchema>;
 //# sourceMappingURL=post.validator.d.ts.map
