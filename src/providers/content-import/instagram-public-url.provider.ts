@@ -104,6 +104,16 @@ function mapProviderError(error: unknown): never {
   );
 }
 
+function providerErrorMessage(payload: ProviderParsePayload | null | undefined): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined;
+  const rec = payload as Record<string, unknown>;
+  for (const key of ['message', 'msg', 'error', 'error_message', 'errorMessage'] as const) {
+    const value = rec[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return undefined;
+}
+
 function hasParsePayload(payload: ProviderParsePayload): boolean {
   if (!payload?.data) return false;
   const statusFalse = payload.status === false || payload.status === 'false' || payload.status === 0;
@@ -339,30 +349,54 @@ export class InstagramPublicUrlImportProvider implements PublicUrlImportProvider
 
     let payload: ProviderParsePayload | null = null;
     let lastError: unknown;
+    let lastProviderMessage: string | undefined;
 
-    // Instagram provider order: source → cache (matches working downloader)
-    for (const origin of ['source', 'cache'] as const) {
+    // Prefer live source; cache often returns empty "not found". Retry source once.
+    for (const origin of ['source', 'source', 'cache'] as const) {
       try {
         const result = await callProvider(parsed.providerUrl, origin);
         if (hasParsePayload(result)) {
           payload = result;
           break;
         }
-        if (result?.message) {
-          lastError = new AppError(String(result.message), 502, 'INSTAGRAM_PARSE_FAILED');
-        }
+        const providerMessage = providerErrorMessage(result) || 'not found';
+        lastProviderMessage = providerMessage;
+        lastError = new AppError(
+          `Instagram downloader could not fetch this media (${providerMessage}).`,
+          404,
+          'INSTAGRAM_MEDIA_NOT_FOUND',
+          { origin, providerStatus: result?.status, providerMessage },
+        );
+        logger.warn('Instagram public parse returned no media', {
+          shortcode: parsed.shortcode,
+          origin,
+          providerStatus: result?.status,
+          providerMessage,
+          hasIgAuth: Boolean(env.IG_AUTH ?? env.VIDSSAVE_AUTH),
+        });
       } catch (error) {
         lastError = error;
         logger.warn('Instagram public parse attempt failed', {
           shortcode: parsed.shortcode,
           origin,
           code: error instanceof AppError ? error.code : undefined,
+          error: error instanceof Error ? error.message : String(error),
+          hasIgAuth: Boolean(env.IG_AUTH ?? env.VIDSSAVE_AUTH),
         });
       }
     }
 
     if (!payload?.data) {
-      mapProviderError(lastError ?? new AppError('Instagram media not found', 404, 'INSTAGRAM_MEDIA_NOT_FOUND'));
+      mapProviderError(
+        lastError ??
+          new AppError(
+            lastProviderMessage
+              ? `Instagram media not found (${lastProviderMessage}).`
+              : 'Instagram media not found. Check the link is public, IG_AUTH is set on the server, and the server can reach the downloader API.',
+            404,
+            'INSTAGRAM_MEDIA_NOT_FOUND',
+          ),
+      );
     }
 
     const data = payload.data!;

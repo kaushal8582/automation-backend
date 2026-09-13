@@ -13,7 +13,11 @@ async function bootstrap() {
     logger.info('Redis connected');
     const app = createApp();
     const server = app.listen(env.PORT, () => {
-        logger.info('API listening', { port: env.PORT, env: env.NODE_ENV });
+        logger.info('API listening', {
+            port: env.PORT,
+            env: env.NODE_ENV,
+            igPublicImportConfigured: Boolean(env.IG_AUTH ?? env.VIDSSAVE_AUTH),
+        });
     });
     const shutdown = async (signal) => {
         logger.info('Shutting down', { signal });
