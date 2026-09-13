@@ -84,6 +84,8 @@ const envSchema = z
         .url()
         .default('https://api.igvideodownloader.net/api/contentsite_api/media/parse'),
     IG_ORIGIN: z.string().url().default('https://igvideodownloader.net'),
+    /** Optional HTTP(S) proxy for IG parser calls (helps when AWS IPs get "analyze failed"). */
+    IG_HTTP_PROXY: z.preprocess(emptyToUndefined, z.string().url().optional()),
     VIDSSAVE_AUTH: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
 })
     .superRefine((data, ctx) => {

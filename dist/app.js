@@ -10,6 +10,8 @@ import { errorHandler } from './middlewares/error-handler.js';
 import { notFoundHandler } from './middlewares/not-found.js';
 export function createApp() {
     const app = express();
+    // Production sits behind Nginx/ALB — needed for express-rate-limit + real client IPs.
+    app.set('trust proxy', 1);
     app.use(helmet());
     app.use(cors({
         origin(origin, callback) {

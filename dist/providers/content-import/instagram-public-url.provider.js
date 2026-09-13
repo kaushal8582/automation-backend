@@ -230,18 +230,53 @@ async function callProvider(link, origin) {
         origin,
         link,
     });
+    const headers = {
+        'content-type': 'application/x-www-form-urlencoded',
+        origin: env.IG_ORIGIN,
+        referer: `${env.IG_ORIGIN}/`,
+        'user-agent': BROWSER_UA,
+        accept: 'application/json, text/plain, */*',
+    };
+    let proxy = false;
+    if (env.IG_HTTP_PROXY) {
+        try {
+            const u = new URL(env.IG_HTTP_PROXY);
+            proxy = {
+                protocol: u.protocol.replace(':', ''),
+                host: u.hostname,
+                port: Number(u.port || (u.protocol === 'https:' ? 443 : 80)),
+                auth: u.username || u.password
+                    ? {
+                        username: decodeURIComponent(u.username),
+                        password: decodeURIComponent(u.password),
+                    }
+                    : undefined,
+            };
+        }
+        catch {
+            logger.warn('IG_HTTP_PROXY is invalid; calling provider without proxy');
+            proxy = false;
+        }
+    }
     const { data } = await axios.post(env.IG_PARSE_URL, body.toString(), {
         timeout: 45_000,
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            origin: env.IG_ORIGIN,
-            referer: `${env.IG_ORIGIN}/`,
-            'user-agent': BROWSER_UA,
-            accept: 'application/json, text/plain, */*',
-        },
+        headers,
         validateStatus: (status) => status >= 200 && status < 500,
+        proxy,
     });
     return data ?? {};
+}
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function humanizeProviderFailure(providerMessage) {
+    const msg = providerMessage.toLowerCase();
+    if (msg.includes('analyze failed') || msg.includes('not found')) {
+        return (`Instagram downloader could not analyze this reel (${providerMessage}). ` +
+            `This often happens when the API runs from a cloud/datacenter IP. ` +
+            `Try again, or set IG_HTTP_PROXY to a residential proxy on the server.`);
+    }
+    return `Instagram downloader could not fetch this media (${providerMessage}).`;
 }
 export class InstagramPublicUrlImportProvider {
     platform = 'instagram';
@@ -264,40 +299,56 @@ export class InstagramPublicUrlImportProvider {
         let payload = null;
         let lastError;
         let lastProviderMessage;
-        // Prefer live source; cache often returns empty "not found". Retry source once.
-        for (const origin of ['source', 'source', 'cache']) {
+        const linkCandidates = Array.from(new Set([parsed.providerUrl, parsed.normalizedUrl].filter(Boolean)));
+        const attempts = [
+            { link: linkCandidates[0], origin: 'source', delayMs: 0 },
+            { link: linkCandidates[0], origin: 'source', delayMs: 1500 },
+            ...(linkCandidates[1]
+                ? [{ link: linkCandidates[1], origin: 'source', delayMs: 500 }]
+                : []),
+            { link: linkCandidates[0], origin: 'cache', delayMs: 500 },
+        ];
+        for (const attempt of attempts) {
+            if (attempt.delayMs > 0)
+                await sleep(attempt.delayMs);
             try {
-                const result = await callProvider(parsed.providerUrl, origin);
+                const result = await callProvider(attempt.link, attempt.origin);
                 if (hasParsePayload(result)) {
                     payload = result;
                     break;
                 }
                 const providerMessage = providerErrorMessage(result) || 'not found';
                 lastProviderMessage = providerMessage;
-                lastError = new AppError(`Instagram downloader could not fetch this media (${providerMessage}).`, 404, 'INSTAGRAM_MEDIA_NOT_FOUND', { origin, providerStatus: result?.status, providerMessage });
+                lastError = new AppError(humanizeProviderFailure(providerMessage), 404, 'INSTAGRAM_MEDIA_NOT_FOUND', {
+                    origin: attempt.origin,
+                    providerStatus: result?.status,
+                    providerMessage,
+                });
                 logger.warn('Instagram public parse returned no media', {
                     shortcode: parsed.shortcode,
-                    origin,
+                    origin: attempt.origin,
                     providerStatus: result?.status,
                     providerMessage,
                     hasIgAuth: Boolean(env.IG_AUTH ?? env.VIDSSAVE_AUTH),
+                    hasProxy: Boolean(env.IG_HTTP_PROXY),
                 });
             }
             catch (error) {
                 lastError = error;
                 logger.warn('Instagram public parse attempt failed', {
                     shortcode: parsed.shortcode,
-                    origin,
+                    origin: attempt.origin,
                     code: error instanceof AppError ? error.code : undefined,
                     error: error instanceof Error ? error.message : String(error),
                     hasIgAuth: Boolean(env.IG_AUTH ?? env.VIDSSAVE_AUTH),
+                    hasProxy: Boolean(env.IG_HTTP_PROXY),
                 });
             }
         }
         if (!payload?.data) {
             mapProviderError(lastError ??
                 new AppError(lastProviderMessage
-                    ? `Instagram media not found (${lastProviderMessage}).`
+                    ? humanizeProviderFailure(lastProviderMessage)
                     : 'Instagram media not found. Check the link is public, IG_AUTH is set on the server, and the server can reach the downloader API.', 404, 'INSTAGRAM_MEDIA_NOT_FOUND'));
         }
         const data = payload.data;

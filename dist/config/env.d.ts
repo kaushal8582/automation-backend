@@ -39,6 +39,8 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_DOMAIN: z.ZodDefault<z.ZodString>;
     IG_PARSE_URL: z.ZodDefault<z.ZodString>;
     IG_ORIGIN: z.ZodDefault<z.ZodString>;
+    /** Optional HTTP(S) proxy for IG parser calls (helps when AWS IPs get "analyze failed"). */
+    IG_HTTP_PROXY: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
     VIDSSAVE_AUTH: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV: "development" | "test" | "production";
@@ -80,6 +82,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
     IG_AUTH?: string | undefined;
+    IG_HTTP_PROXY?: string | undefined;
     VIDSSAVE_AUTH?: string | undefined;
 }, {
     MONGODB_URI: string;
@@ -121,6 +124,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_DOMAIN?: string | undefined;
     IG_PARSE_URL?: string | undefined;
     IG_ORIGIN?: string | undefined;
+    IG_HTTP_PROXY?: unknown;
     VIDSSAVE_AUTH?: unknown;
 }>, {
     NODE_ENV: "development" | "test" | "production";
@@ -162,6 +166,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
     IG_AUTH?: string | undefined;
+    IG_HTTP_PROXY?: string | undefined;
     VIDSSAVE_AUTH?: string | undefined;
 }, {
     MONGODB_URI: string;
@@ -203,6 +208,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_DOMAIN?: string | undefined;
     IG_PARSE_URL?: string | undefined;
     IG_ORIGIN?: string | undefined;
+    IG_HTTP_PROXY?: unknown;
     VIDSSAVE_AUTH?: unknown;
 }>, {
     FRONTEND_URL: string;
@@ -245,6 +251,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
     IG_AUTH?: string | undefined;
+    IG_HTTP_PROXY?: string | undefined;
     VIDSSAVE_AUTH?: string | undefined;
 }, {
     MONGODB_URI: string;
@@ -286,6 +293,7 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_DOMAIN?: string | undefined;
     IG_PARSE_URL?: string | undefined;
     IG_ORIGIN?: string | undefined;
+    IG_HTTP_PROXY?: unknown;
     VIDSSAVE_AUTH?: unknown;
 }>;
 export type Env = z.infer<typeof envSchema>;
@@ -330,6 +338,7 @@ export declare const env: {
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
     IG_AUTH?: string | undefined;
+    IG_HTTP_PROXY?: string | undefined;
     VIDSSAVE_AUTH?: string | undefined;
 };
 /** True if request Origin is an allowed frontend. */
