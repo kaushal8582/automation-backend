@@ -12,7 +12,7 @@ import { notFoundHandler } from './middlewares/not-found.js';
 export function createApp() {
   const app = express();
 
-  app.use(helmet());
+  app.use(helmet()); 
   app.use(
     cors({
       origin(origin, callback) {
