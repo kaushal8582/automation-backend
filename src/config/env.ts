@@ -77,6 +77,15 @@ const envSchema = z
     IG_MEDIA_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(5000),
     IG_MEDIA_POLL_MAX_ATTEMPTS: z.coerce.number().int().positive().default(36),
     PUBLISH_WORKER_CONCURRENCY: z.coerce.number().int().positive().default(5),
+    // Instagram public URL import (third-party parser — backend only)
+    IG_AUTH: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    IG_DOMAIN: z.string().default('api-ak.igvideodownloader.net'),
+    IG_PARSE_URL: z
+      .string()
+      .url()
+      .default('https://api.igvideodownloader.net/api/contentsite_api/media/parse'),
+    IG_ORIGIN: z.string().url().default('https://igvideodownloader.net'),
+    VIDSSAVE_AUTH: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
   })
   .superRefine((data, ctx) => {
     const origins = parseFrontendOrigins(data.FRONTEND_URL);

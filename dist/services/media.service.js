@@ -20,6 +20,15 @@ async function toPublic(media) {
         width: media.width,
         height: media.height,
         status: media.status,
+        sourceType: media.sourceType,
+        sourcePlatform: media.sourcePlatform,
+        sourceExternalId: media.sourceExternalId,
+        sourceResourceId: media.sourceResourceId,
+        sourceCaption: media.sourceCaption,
+        sourceTitle: media.sourceTitle,
+        sourcePostUrl: media.sourcePostUrl,
+        sourceThumbnail: media.sourceThumbnail ?? media.thumbnailPublicUrl,
+        importedAt: media.importedAt,
         createdAt: media.createdAt,
         updatedAt: media.updatedAt,
     };
@@ -102,6 +111,7 @@ export async function completeMediaUpload(userId, input) {
         width: input.width,
         height: input.height,
         status: 'ready',
+        sourceType: 'upload',
     });
     return toPublic(media);
 }
@@ -127,18 +137,23 @@ export async function deleteMediaForUser(userId, mediaId) {
     if (!media) {
         throw new AppError('Media not found', 404, 'MEDIA_NOT_FOUND');
     }
-    if (isR2ConfiguredForRealUploads()) {
-        try {
-            await getR2Client().send(new DeleteObjectCommand({
-                Bucket: getR2Bucket(),
-                Key: media.r2Key,
-            }));
-        }
-        catch {
-            // Continue deleting DB record; storage cleanup can be retried later
-        }
+    // When deleting a video from an Instagram import group, also remove sibling audio
+    // assets (same shortcode) plus any R2 thumbnail keys on those records.
+    const related = [];
+    if (media.type === 'video' &&
+        media.sourceExternalId &&
+        (media.sourcePlatform === 'instagram' || media.sourceType === 'instagram_import')) {
+        const siblings = await MediaAsset.find({
+            userId,
+            _id: { $ne: media._id },
+            sourcePlatform: media.sourcePlatform ?? 'instagram',
+            sourceExternalId: media.sourceExternalId,
+            type: 'audio',
+        });
+        related.push(...siblings);
     }
-    await media.deleteOne();
+    const toDelete = [media, ...related];
+    await deleteMediaAssetsAndR2(userId, toDelete);
 }
 export async function bulkDeleteMediaForUser(userId, ids) {
     const uniqueIds = [...new Set(ids)];
@@ -150,24 +165,64 @@ export async function bulkDeleteMediaForUser(userId, ids) {
     if (items.length === 0) {
         throw new AppError('No matching media found', 404, 'MEDIA_NOT_FOUND');
     }
-    if (isR2ConfiguredForRealUploads()) {
-        await Promise.all(items.map(async (media) => {
-            try {
-                await getR2Client().send(new DeleteObjectCommand({
-                    Bucket: getR2Bucket(),
-                    Key: media.r2Key,
-                }));
-            }
-            catch {
-                // Continue — DB delete still happens
-            }
-        }));
+    // Expand video deletions to include related imported audio siblings
+    const relatedAudioIds = new Set();
+    for (const media of items) {
+        if (media.type === 'video' &&
+            media.sourceExternalId &&
+            (media.sourcePlatform === 'instagram' || media.sourceType === 'instagram_import')) {
+            const siblings = await MediaAsset.find({
+                userId,
+                _id: { $nin: items.map((i) => i._id) },
+                sourcePlatform: media.sourcePlatform ?? 'instagram',
+                sourceExternalId: media.sourceExternalId,
+                type: 'audio',
+            }).select('_id');
+            for (const s of siblings)
+                relatedAudioIds.add(s._id.toString());
+        }
     }
-    const result = await MediaAsset.deleteMany({
+    let allItems = items;
+    if (relatedAudioIds.size > 0) {
+        const extras = await MediaAsset.find({
+            userId,
+            _id: { $in: [...relatedAudioIds].map((id) => new Types.ObjectId(id)) },
+        });
+        allItems = [...items, ...extras];
+    }
+    await deleteMediaAssetsAndR2(userId, allItems);
+    return { deletedCount: allItems.length };
+}
+async function deleteR2Keys(keys) {
+    if (!isR2ConfiguredForRealUploads())
+        return;
+    const unique = [...new Set(keys.filter(Boolean))];
+    await Promise.all(unique.map(async (key) => {
+        try {
+            await getR2Client().send(new DeleteObjectCommand({
+                Bucket: getR2Bucket(),
+                Key: key,
+            }));
+        }
+        catch {
+            // Continue — DB delete still happens
+        }
+    }));
+}
+/** Deletes main object + thumbnail from R2, then removes DB rows. */
+async function deleteMediaAssetsAndR2(userId, items) {
+    const r2Keys = [];
+    for (const media of items) {
+        if (media.r2Key)
+            r2Keys.push(media.r2Key);
+        if (media.thumbnailR2Key)
+            r2Keys.push(media.thumbnailR2Key);
+    }
+    await deleteR2Keys(r2Keys);
+    await MediaAsset.deleteMany({
         _id: { $in: items.map((m) => m._id) },
         userId,
     });
-    return { deletedCount: result.deletedCount ?? 0 };
 }
 export function getMediaUploadLimits() {
     return {

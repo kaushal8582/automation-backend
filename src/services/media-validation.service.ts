@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  ALLOWED_AUDIO_MIME_TYPES,
   ALLOWED_IMAGE_MIME_TYPES,
   ALLOWED_MEDIA_MIME_TYPES,
   ALLOWED_VIDEO_MIME_TYPES,
@@ -43,8 +44,19 @@ export function resolveMediaType(mimeType: AllowedMediaMimeType, requested?: Med
     return 'thumbnail';
   }
 
+  if (requested === 'audio') {
+    if (!(ALLOWED_AUDIO_MIME_TYPES as readonly string[]).includes(mimeType)) {
+      throw new AppError('Audio assets must be audio/*', 400, 'INVALID_MEDIA_TYPE');
+    }
+    return 'audio';
+  }
+
   if ((ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(mimeType)) {
     return 'video';
+  }
+
+  if ((ALLOWED_AUDIO_MIME_TYPES as readonly string[]).includes(mimeType)) {
+    return 'audio';
   }
 
   return 'image';
@@ -60,8 +72,29 @@ export function buildObjectKey(
   mediaType: MediaType,
 ): string {
   const ext = MIME_TO_EXTENSION[mimeType];
-  const folder = mediaType === 'video' ? 'videos' : mediaType === 'thumbnail' ? 'thumbnails' : 'images';
+  const folder =
+    mediaType === 'video'
+      ? 'videos'
+      : mediaType === 'thumbnail'
+        ? 'thumbnails'
+        : mediaType === 'audio'
+          ? 'audio'
+          : 'images';
   return `users/${userId}/${folder}/${randomUUID()}.${ext}`;
+}
+
+/**
+ * R2 key for public-link imports.
+ * Example: users/{userId}/imports/instagram/{uuid}.mp4
+ */
+export function buildImportObjectKey(
+  userId: string,
+  platform: string,
+  mimeType: AllowedMediaMimeType,
+): string {
+  const ext = MIME_TO_EXTENSION[mimeType];
+  const safePlatform = platform.replace(/[^a-z0-9_-]/gi, '').toLowerCase() || 'import';
+  return `users/${userId}/imports/${safePlatform}/${randomUUID()}.${ext}`;
 }
 
 /**

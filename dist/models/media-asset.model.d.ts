@@ -1,5 +1,5 @@
 import { type Document, type Model, Types } from 'mongoose';
-import { type MediaStatus, type MediaType } from '../types/domain.js';
+import { type MediaSourceType, type MediaStatus, type MediaType, type SocialPlatform } from '../types/domain.js';
 export interface IMediaAsset {
     userId: Types.ObjectId;
     type: MediaType;
@@ -12,6 +12,21 @@ export interface IMediaAsset {
     width?: number;
     height?: number;
     status: MediaStatus;
+    /** How this asset entered the library (optional for legacy uploads). */
+    sourceType?: MediaSourceType;
+    sourcePlatform?: SocialPlatform | 'url';
+    sourceAccountId?: Types.ObjectId;
+    sourceExternalId?: string;
+    sourceResourceId?: string;
+    sourcePostUrl?: string;
+    sourceCaption?: string;
+    sourceTitle?: string;
+    sourceThumbnail?: string;
+    importedAt?: Date;
+    sourceMetadata?: Record<string, unknown>;
+    originalThumbnailUrl?: string;
+    thumbnailR2Key?: string;
+    thumbnailPublicUrl?: string;
     createdAt: Date;
     updatedAt: Date;
 }

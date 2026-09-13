@@ -3,48 +3,48 @@ export declare const presignMediaSchema: z.ZodObject<{
     originalFilename: z.ZodString;
     mimeType: z.ZodEnum<[string, ...string[]]>;
     fileSize: z.ZodNumber;
-    type: z.ZodOptional<z.ZodEnum<["video", "image", "thumbnail"]>>;
+    type: z.ZodOptional<z.ZodEnum<["video", "image", "thumbnail", "audio"]>>;
 }, "strip", z.ZodTypeAny, {
     originalFilename: string;
     mimeType: string;
     fileSize: number;
-    type?: "video" | "image" | "thumbnail" | undefined;
+    type?: "video" | "image" | "thumbnail" | "audio" | undefined;
 }, {
     originalFilename: string;
     mimeType: string;
     fileSize: number;
-    type?: "video" | "image" | "thumbnail" | undefined;
+    type?: "video" | "image" | "thumbnail" | "audio" | undefined;
 }>;
 export declare const presignMediaBatchSchema: z.ZodObject<{
     files: z.ZodArray<z.ZodObject<{
         originalFilename: z.ZodString;
         mimeType: z.ZodEnum<[string, ...string[]]>;
         fileSize: z.ZodNumber;
-        type: z.ZodOptional<z.ZodEnum<["video", "image", "thumbnail"]>>;
+        type: z.ZodOptional<z.ZodEnum<["video", "image", "thumbnail", "audio"]>>;
     }, "strip", z.ZodTypeAny, {
         originalFilename: string;
         mimeType: string;
         fileSize: number;
-        type?: "video" | "image" | "thumbnail" | undefined;
+        type?: "video" | "image" | "thumbnail" | "audio" | undefined;
     }, {
         originalFilename: string;
         mimeType: string;
         fileSize: number;
-        type?: "video" | "image" | "thumbnail" | undefined;
+        type?: "video" | "image" | "thumbnail" | "audio" | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     files: {
         originalFilename: string;
         mimeType: string;
         fileSize: number;
-        type?: "video" | "image" | "thumbnail" | undefined;
+        type?: "video" | "image" | "thumbnail" | "audio" | undefined;
     }[];
 }, {
     files: {
         originalFilename: string;
         mimeType: string;
         fileSize: number;
-        type?: "video" | "image" | "thumbnail" | undefined;
+        type?: "video" | "image" | "thumbnail" | "audio" | undefined;
     }[];
 }>;
 export declare const completeMediaSchema: z.ZodObject<{
@@ -52,7 +52,7 @@ export declare const completeMediaSchema: z.ZodObject<{
     originalFilename: z.ZodString;
     mimeType: z.ZodEnum<[string, ...string[]]>;
     fileSize: z.ZodNumber;
-    type: z.ZodOptional<z.ZodEnum<["video", "image", "thumbnail"]>>;
+    type: z.ZodOptional<z.ZodEnum<["video", "image", "thumbnail", "audio"]>>;
     duration: z.ZodOptional<z.ZodNumber>;
     width: z.ZodOptional<z.ZodNumber>;
     height: z.ZodOptional<z.ZodNumber>;
@@ -61,7 +61,7 @@ export declare const completeMediaSchema: z.ZodObject<{
     r2Key: string;
     mimeType: string;
     fileSize: number;
-    type?: "video" | "image" | "thumbnail" | undefined;
+    type?: "video" | "image" | "thumbnail" | "audio" | undefined;
     duration?: number | undefined;
     width?: number | undefined;
     height?: number | undefined;
@@ -70,7 +70,7 @@ export declare const completeMediaSchema: z.ZodObject<{
     r2Key: string;
     mimeType: string;
     fileSize: number;
-    type?: "video" | "image" | "thumbnail" | undefined;
+    type?: "video" | "image" | "thumbnail" | "audio" | undefined;
     duration?: number | undefined;
     width?: number | undefined;
     height?: number | undefined;

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { ALLOWED_IMAGE_MIME_TYPES, ALLOWED_MEDIA_MIME_TYPES, ALLOWED_VIDEO_MIME_TYPES, MIME_TO_EXTENSION, } from '../constants/media.js';
+import { ALLOWED_AUDIO_MIME_TYPES, ALLOWED_IMAGE_MIME_TYPES, ALLOWED_MEDIA_MIME_TYPES, ALLOWED_VIDEO_MIME_TYPES, MIME_TO_EXTENSION, } from '../constants/media.js';
 import { env } from '../config/env.js';
 import { AppError } from '../middlewares/error-handler.js';
 export function assertAllowedMimeType(mimeType) {
@@ -22,8 +22,17 @@ export function resolveMediaType(mimeType, requested) {
         }
         return 'thumbnail';
     }
+    if (requested === 'audio') {
+        if (!ALLOWED_AUDIO_MIME_TYPES.includes(mimeType)) {
+            throw new AppError('Audio assets must be audio/*', 400, 'INVALID_MEDIA_TYPE');
+        }
+        return 'audio';
+    }
     if (ALLOWED_VIDEO_MIME_TYPES.includes(mimeType)) {
         return 'video';
+    }
+    if (ALLOWED_AUDIO_MIME_TYPES.includes(mimeType)) {
+        return 'audio';
     }
     return 'image';
 }
@@ -33,8 +42,23 @@ export function resolveMediaType(mimeType, requested) {
  */
 export function buildObjectKey(userId, mimeType, mediaType) {
     const ext = MIME_TO_EXTENSION[mimeType];
-    const folder = mediaType === 'video' ? 'videos' : mediaType === 'thumbnail' ? 'thumbnails' : 'images';
+    const folder = mediaType === 'video'
+        ? 'videos'
+        : mediaType === 'thumbnail'
+            ? 'thumbnails'
+            : mediaType === 'audio'
+                ? 'audio'
+                : 'images';
     return `users/${userId}/${folder}/${randomUUID()}.${ext}`;
+}
+/**
+ * R2 key for public-link imports.
+ * Example: users/{userId}/imports/instagram/{uuid}.mp4
+ */
+export function buildImportObjectKey(userId, platform, mimeType) {
+    const ext = MIME_TO_EXTENSION[mimeType];
+    const safePlatform = platform.replace(/[^a-z0-9_-]/gi, '').toLowerCase() || 'import';
+    return `users/${userId}/imports/${safePlatform}/${randomUUID()}.${ext}`;
 }
 /**
  * Extension point for future FFmpeg probe/transcode validation.

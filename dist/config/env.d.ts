@@ -35,6 +35,11 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS: z.ZodDefault<z.ZodNumber>;
     IG_MEDIA_POLL_MAX_ATTEMPTS: z.ZodDefault<z.ZodNumber>;
     PUBLISH_WORKER_CONCURRENCY: z.ZodDefault<z.ZodNumber>;
+    IG_AUTH: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
+    IG_DOMAIN: z.ZodDefault<z.ZodString>;
+    IG_PARSE_URL: z.ZodDefault<z.ZodString>;
+    IG_ORIGIN: z.ZodDefault<z.ZodString>;
+    VIDSSAVE_AUTH: z.ZodEffects<z.ZodOptional<z.ZodString>, string | undefined, unknown>;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV: "development" | "test" | "production";
     PORT: number;
@@ -56,6 +61,9 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS: number;
     IG_MEDIA_POLL_MAX_ATTEMPTS: number;
     PUBLISH_WORKER_CONCURRENCY: number;
+    IG_DOMAIN: string;
+    IG_PARSE_URL: string;
+    IG_ORIGIN: string;
     R2_ENDPOINT?: string | undefined;
     R2_BUCKET?: string | undefined;
     R2_PUBLIC_URL?: string | undefined;
@@ -71,6 +79,8 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
+    IG_AUTH?: string | undefined;
+    VIDSSAVE_AUTH?: string | undefined;
 }, {
     MONGODB_URI: string;
     REDIS_URL: string;
@@ -107,6 +117,11 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS?: number | undefined;
     IG_MEDIA_POLL_MAX_ATTEMPTS?: number | undefined;
     PUBLISH_WORKER_CONCURRENCY?: number | undefined;
+    IG_AUTH?: unknown;
+    IG_DOMAIN?: string | undefined;
+    IG_PARSE_URL?: string | undefined;
+    IG_ORIGIN?: string | undefined;
+    VIDSSAVE_AUTH?: unknown;
 }>, {
     NODE_ENV: "development" | "test" | "production";
     PORT: number;
@@ -128,6 +143,9 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS: number;
     IG_MEDIA_POLL_MAX_ATTEMPTS: number;
     PUBLISH_WORKER_CONCURRENCY: number;
+    IG_DOMAIN: string;
+    IG_PARSE_URL: string;
+    IG_ORIGIN: string;
     R2_ENDPOINT?: string | undefined;
     R2_BUCKET?: string | undefined;
     R2_PUBLIC_URL?: string | undefined;
@@ -143,6 +161,8 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
+    IG_AUTH?: string | undefined;
+    VIDSSAVE_AUTH?: string | undefined;
 }, {
     MONGODB_URI: string;
     REDIS_URL: string;
@@ -179,6 +199,11 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS?: number | undefined;
     IG_MEDIA_POLL_MAX_ATTEMPTS?: number | undefined;
     PUBLISH_WORKER_CONCURRENCY?: number | undefined;
+    IG_AUTH?: unknown;
+    IG_DOMAIN?: string | undefined;
+    IG_PARSE_URL?: string | undefined;
+    IG_ORIGIN?: string | undefined;
+    VIDSSAVE_AUTH?: unknown;
 }>, {
     FRONTEND_URL: string;
     FRONTEND_URLS: string[];
@@ -204,6 +229,9 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS: number;
     IG_MEDIA_POLL_MAX_ATTEMPTS: number;
     PUBLISH_WORKER_CONCURRENCY: number;
+    IG_DOMAIN: string;
+    IG_PARSE_URL: string;
+    IG_ORIGIN: string;
     R2_ACCOUNT_ID?: string | undefined;
     R2_BUCKET_NAME?: string | undefined;
     R2_PUBLIC_BASE_URL?: string | undefined;
@@ -216,6 +244,8 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
+    IG_AUTH?: string | undefined;
+    VIDSSAVE_AUTH?: string | undefined;
 }, {
     MONGODB_URI: string;
     REDIS_URL: string;
@@ -252,6 +282,11 @@ declare const envSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     IG_MEDIA_POLL_INTERVAL_MS?: number | undefined;
     IG_MEDIA_POLL_MAX_ATTEMPTS?: number | undefined;
     PUBLISH_WORKER_CONCURRENCY?: number | undefined;
+    IG_AUTH?: unknown;
+    IG_DOMAIN?: string | undefined;
+    IG_PARSE_URL?: string | undefined;
+    IG_ORIGIN?: string | undefined;
+    VIDSSAVE_AUTH?: unknown;
 }>;
 export type Env = z.infer<typeof envSchema>;
 export declare const env: {
@@ -279,6 +314,9 @@ export declare const env: {
     IG_MEDIA_POLL_INTERVAL_MS: number;
     IG_MEDIA_POLL_MAX_ATTEMPTS: number;
     PUBLISH_WORKER_CONCURRENCY: number;
+    IG_DOMAIN: string;
+    IG_PARSE_URL: string;
+    IG_ORIGIN: string;
     R2_ACCOUNT_ID?: string | undefined;
     R2_BUCKET_NAME?: string | undefined;
     R2_PUBLIC_BASE_URL?: string | undefined;
@@ -291,6 +329,8 @@ export declare const env: {
     FACEBOOK_APP_SECRET?: string | undefined;
     FACEBOOK_REDIRECT_URI?: string | undefined;
     FACEBOOK_CONFIG_ID?: string | undefined;
+    IG_AUTH?: string | undefined;
+    VIDSSAVE_AUTH?: string | undefined;
 };
 /** True if request Origin is an allowed frontend. */
 export declare function isAllowedFrontendOrigin(origin: string | undefined): boolean;

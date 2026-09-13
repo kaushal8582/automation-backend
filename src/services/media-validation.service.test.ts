@@ -41,4 +41,15 @@ describe('media validation', () => {
       }),
     ).resolves.toBeUndefined();
   });
+
+  it('resolves audio mime types', () => {
+    expect(resolveMediaType('audio/mpeg')).toBe('audio');
+    expect(resolveMediaType('audio/mp4', 'audio')).toBe('audio');
+  });
+
+  it('builds audio object keys under users/{userId}/audio/…', () => {
+    const key = buildObjectKey('abc123', 'audio/mpeg', 'audio');
+    expect(key.startsWith('users/abc123/audio/')).toBe(true);
+    expect(key.endsWith('.mp3')).toBe(true);
+  });
 });

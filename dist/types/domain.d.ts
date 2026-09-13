@@ -4,7 +4,7 @@ export declare const SOCIAL_ACCOUNT_TYPES: readonly ["instagram_business", "inst
 export type SocialAccountType = (typeof SOCIAL_ACCOUNT_TYPES)[number];
 export declare const SOCIAL_ACCOUNT_STATUSES: readonly ["active", "expired", "revoked", "error"];
 export type SocialAccountStatus = (typeof SOCIAL_ACCOUNT_STATUSES)[number];
-export declare const MEDIA_TYPES: readonly ["video", "image", "thumbnail"];
+export declare const MEDIA_TYPES: readonly ["video", "image", "thumbnail", "audio"];
 export type MediaType = (typeof MEDIA_TYPES)[number];
 export declare const MEDIA_STATUSES: readonly ["uploading", "ready", "failed"];
 export type MediaStatus = (typeof MEDIA_STATUSES)[number];
@@ -14,4 +14,10 @@ export declare const POST_STATUSES: readonly ["draft", "queued", "scheduled", "p
 export type PostStatus = (typeof POST_STATUSES)[number];
 export declare const DESTINATION_STATUSES: readonly ["pending", "queued", "processing", "uploading", "processing_media", "ready_to_publish", "publishing", "published", "failed", "cancelled"];
 export type DestinationStatus = (typeof DESTINATION_STATUSES)[number];
+export declare const MEDIA_SOURCE_TYPES: readonly ["upload", "instagram", "instagram_import", "facebook", "url", "other"];
+export type MediaSourceType = (typeof MEDIA_SOURCE_TYPES)[number];
+export declare const CONTENT_IMPORT_JOB_STATUSES: readonly ["pending", "fetching_metadata", "resolving", "downloading", "uploading_to_r2", "processing", "completed", "failed", "already_imported"];
+export type ContentImportJobStatus = (typeof CONTENT_IMPORT_JOB_STATUSES)[number];
+export declare const CONTENT_IMPORT_ERROR_CODES: readonly ["IMPORT_SOURCE_UNSUPPORTED", "IMPORT_PERMISSION_REQUIRED", "IMPORT_TOKEN_EXPIRED", "IMPORT_MEDIA_NOT_FOUND", "IMPORT_MEDIA_TOO_LARGE", "IMPORT_DOWNLOAD_FAILED", "IMPORT_UPLOAD_FAILED", "IMPORT_R2_UPLOAD_FAILED", "IMPORT_DUPLICATE", "IMPORT_RATE_LIMITED", "IMPORT_PLATFORM_ERROR", "IMPORT_RIGHTS_NOT_CONFIRMED", "INVALID_INSTAGRAM_URL", "INSTAGRAM_PARSE_FAILED", "INSTAGRAM_MEDIA_NOT_FOUND", "INSTAGRAM_PROVIDER_RATE_LIMIT", "INSTAGRAM_PROVIDER_UNAVAILABLE", "INSTAGRAM_DOWNLOAD_EXPIRED"];
+export type ContentImportErrorCode = (typeof CONTENT_IMPORT_ERROR_CODES)[number];
 //# sourceMappingURL=domain.d.ts.map

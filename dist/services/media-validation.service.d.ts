@@ -9,6 +9,11 @@ export declare function resolveMediaType(mimeType: AllowedMediaMimeType, request
  */
 export declare function buildObjectKey(userId: string, mimeType: AllowedMediaMimeType, mediaType: MediaType): string;
 /**
+ * R2 key for public-link imports.
+ * Example: users/{userId}/imports/instagram/{uuid}.mp4
+ */
+export declare function buildImportObjectKey(userId: string, platform: string, mimeType: AllowedMediaMimeType): string;
+/**
  * Extension point for future FFmpeg probe/transcode validation.
  * Phase 4 only checks metadata constraints; does not block the event loop on large files.
  */

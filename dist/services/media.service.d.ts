@@ -21,6 +21,15 @@ export type PublicMediaAsset = {
     width?: number;
     height?: number;
     status: IMediaAssetDocument['status'];
+    sourceType?: IMediaAssetDocument['sourceType'];
+    sourcePlatform?: IMediaAssetDocument['sourcePlatform'];
+    sourceExternalId?: string;
+    sourceResourceId?: string;
+    sourceCaption?: string;
+    sourceTitle?: string;
+    sourcePostUrl?: string;
+    sourceThumbnail?: string;
+    importedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 };

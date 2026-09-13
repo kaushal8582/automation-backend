@@ -4,4 +4,5 @@ export { MediaAsset, type IMediaAsset, type IMediaAssetDocument, } from './media
 export { Post, type IPost, type IPostDocument } from './post.model.js';
 export { PostDestination, type IPostDestination, type IPostDestinationDocument, } from './post-destination.model.js';
 export { SocialPostMetrics, type ISocialPostMetrics, type ISocialPostMetricsDocument, } from './social-post-metrics.model.js';
+export { ContentImportJob, type IContentImportJob, type IContentImportJobDocument, } from './content-import-job.model.js';
 //# sourceMappingURL=index.d.ts.map

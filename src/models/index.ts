@@ -20,3 +20,8 @@ export {
   type ISocialPostMetrics,
   type ISocialPostMetricsDocument,
 } from './social-post-metrics.model.js';
+export {
+  ContentImportJob,
+  type IContentImportJob,
+  type IContentImportJobDocument,
+} from './content-import-job.model.js';

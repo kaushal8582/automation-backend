@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ContentImportJob,
   MediaAsset,
   Post,
   PostDestination,
@@ -16,6 +17,7 @@ describe('mongoose models', () => {
     expect(Post.modelName).toBe('Post');
     expect(PostDestination.modelName).toBe('PostDestination');
     expect(SocialPostMetrics.modelName).toBe('SocialPostMetrics');
+    expect(ContentImportJob.modelName).toBe('ContentImportJob');
   });
 
   it('defines expected SocialAccount indexes', () => {

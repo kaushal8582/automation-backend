@@ -2,11 +2,13 @@ import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { connectMongo, disconnectMongo } from './config/mongo.js';
 import { connectRedis, disconnectRedis } from './config/redis.js';
+import { syncMediaAssetIndexes } from './services/media-indexes.js';
 import { createLogger } from './utils/logger.js';
 const logger = createLogger('server');
 async function bootstrap() {
     await connectMongo();
     logger.info('MongoDB connected');
+    await syncMediaAssetIndexes();
     await connectRedis();
     logger.info('Redis connected');
     const app = createApp();
